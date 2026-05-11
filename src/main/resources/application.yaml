@@ -30,7 +30,7 @@ spring:
 # Simulation config — we will use this in Step 4 (Scheduler)
 simulation:
   tick:
-    rate-seconds: 60              # 1 tick every 60 real seconds
+    rate-seconds: 10000          # 10 seconds in dev (change to 60000 in prod)
     sim-hours-per-tick: 1         # 1 tick = 1 sim hour
 
 logging:
