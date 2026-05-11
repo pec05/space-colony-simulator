@@ -17,7 +17,7 @@ public class ColonyMapper {
 
     public Colony toDomain(ColonyEntity entity) {
         List<ColonyResource> resources = entity.getResources().stream()
-                .map((ColonyResourceEntity r) -> toDomain(r))
+                .map(this::toDomain)
                 .toList();
 
         return Colony.builder()
