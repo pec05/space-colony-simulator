@@ -52,7 +52,7 @@ public class ColonyMapper {
                 .eventType(EventType.valueOf(entity.getEventType()))
                 .severity(EventSeverity.valueOf(entity.getSeverity()))
                 .description(entity.getDescription())
-                .simOccuredAt(entity.getSimOccurredAt())
+                .simOccurredAt(entity.getSimOccurredAt())
                 .simResolvedAt(entity.getSimResolvedAt())
                 .resolved(entity.isResolved())
                 .build();

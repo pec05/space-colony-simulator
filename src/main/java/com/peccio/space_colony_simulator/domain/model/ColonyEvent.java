@@ -3,7 +3,6 @@ package com.peccio.space_colony_simulator.domain.model;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -21,7 +20,7 @@ public class ColonyEvent {
     private final EventType eventType;
     private final EventSeverity severity;
     private final String description;
-    private final LocalDateTime simOccuredAt;
+    private final LocalDateTime simOccurredAt;
 
     private LocalDateTime simResolvedAt;
     private boolean resolved;

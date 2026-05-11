@@ -77,7 +77,7 @@ public class TickProcessor {
                 .eventType(eventType)
                 .severity(severity)
                 .description(description)
-                .simOccuredAt(simTime)
+                .simOccurredAt(simTime)
                 .resolved(false)
                 .build();
     }

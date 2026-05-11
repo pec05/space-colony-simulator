@@ -40,6 +40,9 @@ public class ColonyEntity {
     @Column(name = "last_tick_at", nullable = false)
     private LocalDateTime lastTickAt;
 
+    @Column(name = "last_processed_at", nullable = false)
+    private LocalDateTime lastProcessedAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

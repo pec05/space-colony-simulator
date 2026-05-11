@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ColonySimulationService {
     private final ColonyRepository colonyRepository;
-    private final ColonyTickService colonyTickService;
+    private final CatchUpService catchUpService;
 
     /**
      * Entry point called by the scheduler every tick interval.
@@ -37,7 +37,11 @@ public class ColonySimulationService {
 
         for (ColonyEntity colony : activeColonies) {
             try {
-                colonyTickService.tick(colony);
+                CatchUpResult result = catchUpService.catchUp(colony);
+                if (result.hadMissedTicks()) {
+                    log.info("↩ Colony '{}' caught up {} missed tick(s)",
+                            result.colonyName(), result.ticksProcessed());
+                }
                 success++;
             } catch (Exception ex) {
                 failure++;

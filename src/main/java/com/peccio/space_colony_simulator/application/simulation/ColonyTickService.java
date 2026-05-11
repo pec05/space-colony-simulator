@@ -111,7 +111,7 @@ public class ColonyTickService {
                 .eventType(event.getEventType().name())
                 .severity(event.getSeverity().name())
                 .description(event.getDescription())
-                .simOccurredAt(event.getSimOccuredAt())
+                .simOccurredAt(event.getSimOccurredAt())
                 .resolved(false)
                 .build();
     }

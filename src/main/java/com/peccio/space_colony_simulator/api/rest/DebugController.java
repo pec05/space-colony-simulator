@@ -67,6 +67,7 @@ public class DebugController {
                 .status("ACTIVE")
                 .foundedAt(now)
                 .lastTickAt(now)
+                .lastProcessedAt(now)
                 .build();
 
         colony = colonyRepository.save(colony);
