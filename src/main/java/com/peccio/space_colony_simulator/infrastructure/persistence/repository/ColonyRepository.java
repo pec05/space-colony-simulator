@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ColonyRepository extends JpaRepository<ColonyResourceEntity, Long> {
+public interface ColonyRepository extends JpaRepository<ColonyEntity, Long> {
 
     List<ColonyEntity> findAllByStatus(String status);
 }

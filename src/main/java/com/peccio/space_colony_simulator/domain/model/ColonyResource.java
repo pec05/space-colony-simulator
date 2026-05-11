@@ -51,4 +51,11 @@ public class ColonyResource {
                 .max(BigDecimal.ZERO)
                 .min(storageCapacity);
     }
+
+    /**
+     * Completely depleted — triggers a shortage event.
+     */
+    public boolean isInShortage() {
+        return currentAmount.compareTo(BigDecimal.ZERO) == 0;
+    }
 }
