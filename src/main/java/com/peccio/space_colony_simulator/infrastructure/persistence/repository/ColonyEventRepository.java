@@ -4,10 +4,18 @@ import com.peccio.space_colony_simulator.infrastructure.persistence.entity.Colon
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface ColonyEventRepository extends JpaRepository<ColonyEventEntity, Long> {
     List<ColonyEventEntity> findAllByColonyId(Long colonyId);
     List<ColonyEventEntity> findAllByColonyIdAndResolved(Long colonyId, boolean resolved);
+
+    // Returns ALL events for a colony ordered by sim time — used for full replay
+    List<ColonyEventEntity> findAllByColonyIdOrderBySimOccurredAtAsc(Long colonyId);
+
+    // Returns events AFTER a given sim timestamp — used for partial replay (since last login)
+    List<ColonyEventEntity> findAllByColonyIdAndSimOccurredAtAfterOrderBySimOccurredAtAsc(
+            Long colonyId, LocalDateTime since);
 }
