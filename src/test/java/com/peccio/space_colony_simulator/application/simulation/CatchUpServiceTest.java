@@ -70,7 +70,7 @@ class CatchUpServiceTest {
         stubMocks(entity, colony);
 
         CatchUpResult result = catchUpService.catchUp(entity.getId());
-        when(colonyRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
         assertThat(result.ticksProcessed()).isEqualTo(1);
     }
 
@@ -84,7 +84,7 @@ class CatchUpServiceTest {
         stubMocks(entity, colony);
 
         CatchUpResult result = catchUpService.catchUp(entity.getId());
-        when(colonyRepository.findById(anyLong())).thenReturn(Optional.of(entity));
+
         assertThat(result.ticksProcessed()).isEqualTo(3);
         verify(tickProcessor, times(3)).process(any(), any());
     }
@@ -99,7 +99,6 @@ class CatchUpServiceTest {
         stubMocks(entity, colony);
 
         CatchUpResult result = catchUpService.catchUp(entity.getId());
-        when(colonyRepository.findById(anyLong())).thenReturn(Optional.of(entity));
         assertThat(result.ticksProcessed()).isEqualTo(1);
     }
 
@@ -113,7 +112,6 @@ class CatchUpServiceTest {
         stubMocks(entity, colony);
 
         CatchUpResult result = catchUpService.catchUp(entity.getId());
-        when(colonyRepository.findById(anyLong())).thenReturn(Optional.of(entity));
 
         assertThat(result.ticksProcessed()).isEqualTo(CatchUpService.MAX_CATCH_UP_TICKS);
         verify(tickProcessor, times(CatchUpService.MAX_CATCH_UP_TICKS)).process(any(), any());
@@ -132,7 +130,6 @@ class CatchUpServiceTest {
         stubMocks(entity, colony);
 
         CatchUpResult result = catchUpService.catchUp(entity.getId());
-        when(colonyRepository.findById(anyLong())).thenReturn(Optional.of(entity));
         assertThat(result.hadMissedTicks()).isFalse();
     }
 
@@ -145,7 +142,6 @@ class CatchUpServiceTest {
         stubMocks(entity, colony);
 
         CatchUpResult result = catchUpService.catchUp(entity.getId());
-        when(colonyRepository.findById(anyLong())).thenReturn(Optional.of(entity));
         assertThat(result.hadMissedTicks()).isTrue();
     }
 
@@ -182,7 +178,6 @@ class CatchUpServiceTest {
         stubMocks(entity, colony);
 
         CatchUpResult result = catchUpService.catchUp(entity.getId());
-        when(colonyRepository.findById(anyLong())).thenReturn(Optional.of(entity));
         assertThat(result.colonyId()).isEqualTo(1L);
         assertThat(result.colonyName()).isEqualTo("Test Colony");
     }
@@ -200,7 +195,6 @@ class CatchUpServiceTest {
         stubMocks(entity, colony);
 
         catchUpService.catchUp(entity.getId());
-        when(colonyRepository.findById(anyLong())).thenReturn(Optional.of(entity));
         verify(colonyRepository, times(1)).save(entity);
     }
 
@@ -226,6 +220,8 @@ class CatchUpServiceTest {
     // -------------------------------------------------------
 
     private void stubMocks(ColonyEntity entity, Colony colony) {
+        when(colonyRepository.findById(anyLong()))           // ← add this line
+                .thenReturn(Optional.of(entity));
         when(colonyMapper.toDomain(entity)).thenReturn(colony);
         when(tickProcessor.process(any(), any()))
                 .thenReturn(new TickResult(1L, List.of()));
