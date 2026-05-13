@@ -85,8 +85,16 @@ public class ReplayService {
                 .map(this::toResourceDto)
                 .toList();
 
+        // Only the most recent unresolved event per type
         List<EventSummary> activeEvents = eventRepository
                 .findAllByColonyIdAndResolved(colonyId, false)
+                .stream()
+                .collect(Collectors.toMap(
+                        ColonyEventEntity::getEventType,
+                        e -> e,
+                        (existing, newer) -> newer
+                ))
+                .values()
                 .stream()
                 .map(this::toEventSummary)
                 .toList();

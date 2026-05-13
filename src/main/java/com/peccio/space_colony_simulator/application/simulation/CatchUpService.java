@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -134,19 +135,29 @@ public class CatchUpService {
     private void persistEvents(List<ColonyEvent> events, ColonyEntity colonyEntity) {
         if (events.isEmpty()) return;
 
+        // Events already in DB (from previous runs)
         Set<String> existingTypes = eventRepository
                 .findAllByColonyIdAndResolved(colonyEntity.getId(), false)
                 .stream()
                 .map(ColonyEventEntity::getEventType)
                 .collect(Collectors.toSet());
 
-        List<ColonyEventEntity> toSave = events.stream()
-                .filter(e -> !existingTypes.contains(e.getEventType().name()))
-                .map(e -> toEntity(e, colonyEntity))
-                .toList();
+        // Deduplicate WITHIN this catch-up run too — keep only first per type
+        Set<String> seenInThisRun = new HashSet<>(existingTypes);
+
+        List<ColonyEventEntity> toSave = new ArrayList<>();
+        for (ColonyEvent event : events) {
+            String type = event.getEventType().name();
+            if (!seenInThisRun.contains(type)) {
+                toSave.add(toEntity(event, colonyEntity));
+                seenInThisRun.add(type);   // block duplicates within same run
+            }
+        }
 
         if (!toSave.isEmpty()) {
             eventRepository.saveAll(toSave);
+            log.info("Colony '{}' — {} new event(s) persisted",
+                    colonyEntity.getName(), toSave.size());
         }
     }
 
