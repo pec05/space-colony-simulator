@@ -37,7 +37,7 @@ public class ColonySimulationService {
 
         for (ColonyEntity colony : activeColonies) {
             try {
-                CatchUpResult result = catchUpService.catchUp(colony);
+                CatchUpResult result = catchUpService.catchUp(colony.getId());
                 if (result.hadMissedTicks()) {
                     log.info("↩ Colony '{}' caught up {} missed tick(s)",
                             result.colonyName(), result.ticksProcessed());

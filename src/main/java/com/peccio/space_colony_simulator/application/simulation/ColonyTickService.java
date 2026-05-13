@@ -48,7 +48,11 @@ public class ColonyTickService {
      *  6. Advance colony's lastTickAt
      */
     @Transactional
-    public void tick(ColonyEntity colonyEntity) {
+    public void tick(Long colonyId) {
+        ColonyEntity colonyEntity = colonyRepository.findById(colonyId)
+                .orElseThrow();
+
+
         Colony colony = colonyMapper.toDomain(colonyEntity);
         LocalDateTime next = colony.getLastTickAt().plusHours(1);
 

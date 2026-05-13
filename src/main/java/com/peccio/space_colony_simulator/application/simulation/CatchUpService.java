@@ -12,7 +12,9 @@ import com.peccio.space_colony_simulator.infrastructure.persistence.repository.C
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.ColonyResourceRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -58,7 +60,12 @@ public class CatchUpService {
      * Calculates missed ticks, runs them all in memory, persists once.
      */
     @Transactional
-    public CatchUpResult catchUp(ColonyEntity colonyEntity) {
+    public CatchUpResult catchUp(Long colonyId) {
+
+        // Load fresh within THIS transaction — lazy collections work correctly
+        ColonyEntity colonyEntity = colonyRepository.findById(colonyId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Colony not found: " + colonyId));
+
         LocalDateTime now        = LocalDateTime.now();
         int ticksToRun           = calculateMissedTicks(colonyEntity.getLastProcessedAt(), now);
         Colony colony            = colonyMapper.toDomain(colonyEntity);

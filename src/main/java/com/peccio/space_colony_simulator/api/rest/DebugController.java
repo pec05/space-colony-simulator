@@ -116,6 +116,41 @@ public class DebugController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * Creates a colony with consumption > production — will generate shortage events fast.
+     * POST /api/debug/colony/struggling?name=Beta
+     */
+    @PostMapping("/colony/struggling")
+    public ResponseEntity<String> createStrugglingColony(
+            @RequestParam(defaultValue = "Beta") String name) {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        ColonyEntity colony = ColonyEntity.builder()
+                .name(name)
+                .ownerId("debug-user")
+                .population(10)
+                .status("ACTIVE")
+                .foundedAt(now)
+                .lastTickAt(now)
+                .lastProcessedAt(now)
+                .build();
+
+        colony = colonyRepository.save(colony);
+        // Consumption EXCEEDS production — colony will hit shortage fast
+        List<ColonyResourceEntity> resources = List.of(
+                resource(colony, "OXYGEN",    50,  2, 8,  1000),   // draining fast
+                resource(colony, "FOOD",      80,  3, 10, 1000),   // draining fast
+                resource(colony, "ENERGY",    500, 10, 10, 1000),  // stable
+                resource(colony, "MATERIALS", 400, 5,  4,  1000)   // stable
+        );
+
+        resourceRepository.saveAll(resources);
+
+        return ResponseEntity.ok("Struggling colony '%s' created with id=%d"
+                .formatted(name, colony.getId()));
+    }
+
     private List<ColonyResourceEntity> buildStartingResources(ColonyEntity colony) {
         // Balanced starting state:
         // Production slightly exceeds consumption so the colony is stable at first.
