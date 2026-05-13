@@ -28,6 +28,10 @@ public class ColonyEntity {
     @Column(name = "owner_id", nullable = false, length = 100)
     private String ownerId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
     @Column(nullable = false)
     private int population;
 

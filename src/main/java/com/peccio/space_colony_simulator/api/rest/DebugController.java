@@ -3,11 +3,15 @@ package com.peccio.space_colony_simulator.api.rest;
 import com.peccio.space_colony_simulator.application.simulation.ColonySimulationService;
 import com.peccio.space_colony_simulator.infrastructure.persistence.entity.ColonyEntity;
 import com.peccio.space_colony_simulator.infrastructure.persistence.entity.ColonyResourceEntity;
+import com.peccio.space_colony_simulator.infrastructure.persistence.entity.UserEntity;
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.ColonyRepository;
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.ColonyResourceRepository;
+import com.peccio.space_colony_simulator.infrastructure.persistence.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,15 +32,17 @@ public class DebugController {
     private final ColonySimulationService simulationService;
     private final ColonyRepository colonyRepository;
     private final ColonyResourceRepository resourceRepository;
+    private final UserRepository userRepository;
 
     public DebugController(
             ColonySimulationService simulationService,
             ColonyRepository colonyRepository,
-            ColonyResourceRepository resourceRepository) {
+            ColonyResourceRepository resourceRepository, UserRepository userRepository) {
 
         this.simulationService  = simulationService;
         this.colonyRepository   = colonyRepository;
         this.resourceRepository = resourceRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -56,13 +62,23 @@ public class DebugController {
      */
     @PostMapping("/colony")
     public ResponseEntity<String> createTestColony(
-            @RequestParam(defaultValue = "Alpha") String name) {
+            @RequestParam(defaultValue = "Alpha") String name,
+            @RequestParam(required = false) Long userId) {
 
         LocalDateTime now = LocalDateTime.now();
 
+        // Resolve user entity if userId provided
+        UserEntity userEntity = null;
+        if (userId != null) {
+            userEntity = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND, "User not found: " + userId));
+        }
+
         ColonyEntity colony = ColonyEntity.builder()
                 .name(name)
-                .ownerId("debug-user")
+                .ownerId(userEntity != null ? userEntity.getUsername() : "debug-user")
+                .user(userEntity)
                 .population(10)
                 .status("ACTIVE")
                 .foundedAt(now)
@@ -71,14 +87,12 @@ public class DebugController {
                 .build();
 
         colony = colonyRepository.save(colony);
-        final Long colonyId = colony.getId();
+        resourceRepository.saveAll(buildStartingResources(colony));
 
-        List<ColonyResourceEntity> resources = buildStartingResources(colony);
-        resourceRepository.saveAll(resources);
-
-        log.info("Test colony '{}' created with id={}", name, colonyId);
         return ResponseEntity.ok(
-                "Colony '%s' created with id=%d".formatted(name, colonyId)
+                "Colony '%s' created with id=%d (owner=%s)"
+                        .formatted(name, colony.getId(),
+                                userEntity != null ? userEntity.getUsername() : "debug-user")
         );
     }
 

@@ -11,4 +11,8 @@ import java.util.List;
 public interface ColonyRepository extends JpaRepository<ColonyEntity, Long> {
 
     List<ColonyEntity> findAllByStatus(String status);
+
+    List<ColonyEntity> findAllByUserId(Long userId);
+
+    int countByUserId(Long userId);
 }
