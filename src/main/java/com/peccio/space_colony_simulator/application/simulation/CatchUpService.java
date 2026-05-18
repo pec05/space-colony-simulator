@@ -1,5 +1,6 @@
 package com.peccio.space_colony_simulator.application.simulation;
 
+import com.peccio.space_colony_simulator.application.event.EventResolutionService;
 import com.peccio.space_colony_simulator.domain.model.Colony;
 import com.peccio.space_colony_simulator.domain.model.ColonyEvent;
 import com.peccio.space_colony_simulator.domain.model.ColonyResource;
@@ -39,6 +40,7 @@ public class CatchUpService {
     private final ColonyMapper colonyMapper;
     private final TickProcessor            tickProcessor;
     private final SimulationProperties simulationProperties;
+    private final EventResolutionService eventResolutionService;
 
     public CatchUpService(
             ColonyRepository colonyRepository,
@@ -46,7 +48,8 @@ public class CatchUpService {
             ColonyEventRepository eventRepository,
             ColonyMapper colonyMapper,
             TickProcessor tickProcessor,
-            SimulationProperties simulationProperties) {
+            SimulationProperties simulationProperties,
+            EventResolutionService eventResolutionService) {
 
         this.colonyRepository    = colonyRepository;
         this.resourceRepository  = resourceRepository;
@@ -54,6 +57,7 @@ public class CatchUpService {
         this.colonyMapper        = colonyMapper;
         this.tickProcessor       = tickProcessor;
         this.simulationProperties = simulationProperties;
+        this.eventResolutionService = eventResolutionService;
     }
 
     /**
@@ -86,12 +90,20 @@ public class CatchUpService {
         persistResourceChanges(colony);
         persistEvents(events, colonyEntity);
 
+        // Auto-resolve events whose condition cleared after this tick batch
+        int autoResolved = eventResolutionService.autoResolve(
+                colonyId, colony, colony.getLastTickAt());
+
+        if (autoResolved > 0) {
+            log.info("Colony '{}' — {} event(s) auto-resolved", colony.getName(), autoResolved);
+        }
+
         colonyMapper.updateEntity(colonyEntity, colony);
         colonyEntity.setLastProcessedAt(now);
         colonyRepository.save(colonyEntity);
 
-        log.info("Colony '{}' — {} tick(s) processed, {} event(s) generated",
-                colony.getName(), ticksToRun, events.size());
+        log.info("Colony '{}' — {} tick(s) processed, {} event(s) generated, {} auto-resolved",
+                colony.getName(), ticksToRun, events.size(), autoResolved);
 
         return new CatchUpResult(colony.getId(), colony.getName(), ticksToRun, events);
     }

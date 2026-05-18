@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ColonyEventRepository extends JpaRepository<ColonyEventEntity, Long> {
@@ -18,4 +19,7 @@ public interface ColonyEventRepository extends JpaRepository<ColonyEventEntity, 
     // Returns events AFTER a given sim timestamp — used for partial replay (since last login)
     List<ColonyEventEntity> findAllByColonyIdAndSimOccurredAtAfterOrderBySimOccurredAtAsc(
             Long colonyId, LocalDateTime since);
+
+    Optional<ColonyEventEntity> findByColonyIdAndEventTypeAndResolved(
+            Long colonyId, String eventType, boolean resolved);
 }
