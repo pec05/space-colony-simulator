@@ -18,4 +18,6 @@ public class SimulationProperties {
 
     /** How many simulation hours advance per tick. */
     private int simHoursPerTick = 1;
+
+    private int tradeTransitHours = 2;
 }

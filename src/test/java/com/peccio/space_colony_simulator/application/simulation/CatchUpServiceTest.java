@@ -1,6 +1,7 @@
 package com.peccio.space_colony_simulator.application.simulation;
 
 import com.peccio.space_colony_simulator.application.event.EventResolutionService;
+import com.peccio.space_colony_simulator.application.trade.TradeSettlementService;
 import com.peccio.space_colony_simulator.domain.model.*;
 import com.peccio.space_colony_simulator.infrastructure.config.SimulationProperties;
 import com.peccio.space_colony_simulator.infrastructure.persistence.entity.ColonyEntity;
@@ -41,6 +42,7 @@ class CatchUpServiceTest {
     private SimulationProperties simulationProperties;
     private CatchUpService       catchUpService;
     private EventResolutionService eventResolutionService;
+    private TradeSettlementService tradeSettlementService;
 
     @BeforeEach
     void setUp() {
@@ -55,7 +57,8 @@ class CatchUpServiceTest {
                 colonyMapper,
                 tickProcessor,
                 simulationProperties,
-                eventResolutionService
+                eventResolutionService,
+                tradeSettlementService
         );
     }
 

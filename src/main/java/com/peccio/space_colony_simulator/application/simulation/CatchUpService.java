@@ -1,6 +1,7 @@
 package com.peccio.space_colony_simulator.application.simulation;
 
 import com.peccio.space_colony_simulator.application.event.EventResolutionService;
+import com.peccio.space_colony_simulator.application.trade.TradeSettlementService;
 import com.peccio.space_colony_simulator.domain.model.Colony;
 import com.peccio.space_colony_simulator.domain.model.ColonyEvent;
 import com.peccio.space_colony_simulator.domain.model.ColonyResource;
@@ -41,6 +42,7 @@ public class CatchUpService {
     private final TickProcessor            tickProcessor;
     private final SimulationProperties simulationProperties;
     private final EventResolutionService eventResolutionService;
+    private final TradeSettlementService tradeSettlementService;
 
     public CatchUpService(
             ColonyRepository colonyRepository,
@@ -49,7 +51,8 @@ public class CatchUpService {
             ColonyMapper colonyMapper,
             TickProcessor tickProcessor,
             SimulationProperties simulationProperties,
-            EventResolutionService eventResolutionService) {
+            EventResolutionService eventResolutionService,
+            TradeSettlementService tradeSettlementService) {
 
         this.colonyRepository    = colonyRepository;
         this.resourceRepository  = resourceRepository;
@@ -58,6 +61,7 @@ public class CatchUpService {
         this.tickProcessor       = tickProcessor;
         this.simulationProperties = simulationProperties;
         this.eventResolutionService = eventResolutionService;
+        this.tradeSettlementService = tradeSettlementService;
     }
 
     /**
@@ -96,6 +100,12 @@ public class CatchUpService {
 
         if (autoResolved > 0) {
             log.info("Colony '{}' — {} event(s) auto-resolved", colony.getName(), autoResolved);
+        }
+
+        int settledTrades = tradeSettlementService.settleArrivedTrades(colonyId, colony.getLastTickAt());
+
+        if (settledTrades > 0) {
+            log.info("Colony '{}' — {} trade(s) settled", colony.getName(), settledTrades);
         }
 
         colonyMapper.updateEntity(colonyEntity, colony);

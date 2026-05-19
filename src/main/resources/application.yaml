@@ -32,8 +32,14 @@ simulation:
   tick:
     rate-seconds: 10000          # 10 seconds in dev (change to 60000 in prod)
     sim-hours-per-tick: 1         # 1 tick = 1 sim hour
+    trade-transit-hours: 2       # hours it takes for trade ships to arrive at their destination
 
 logging:
   level:
     com.spacecolony: DEBUG
     org.flywaydb: INFO
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
