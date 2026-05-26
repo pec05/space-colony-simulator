@@ -36,10 +36,16 @@ simulation:
 
 logging:
   level:
-    com.spacecolony: DEBUG
+    com.peccio.space_colony_simulator: DEBUG
     org.flywaydb: INFO
 
 server:
   error:
     include-message: always
     include-binding-errors: always
+
+security:
+  jwt:
+    # 256-bit Base64 encoded secret — change this in production!
+    secret: dGhpcy1pcy1hLXNlY3VyZS1kZXYtc2VjcmV0LWtleS1mb3Itand0LXNpZ25pbmctaW4tc3BhY2UtY29sb255LXNpbXVsYXRvcg==
+    expiration-ms: 86400000   # 24 hours
