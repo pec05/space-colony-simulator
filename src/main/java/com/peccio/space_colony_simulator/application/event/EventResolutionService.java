@@ -5,6 +5,7 @@ import com.peccio.space_colony_simulator.domain.model.EventSeverity;
 import com.peccio.space_colony_simulator.domain.model.ResourceType;
 import com.peccio.space_colony_simulator.infrastructure.persistence.entity.ColonyEventEntity;
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.ColonyEventRepository;
+import com.peccio.space_colony_simulator.infrastructure.security.AuthenticatedUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -31,9 +32,11 @@ import java.util.List;
 public class EventResolutionService {
 
     private final ColonyEventRepository eventRepository;
+    private final AuthenticatedUserService authService;
 
-    public EventResolutionService(ColonyEventRepository eventRepository) {
+    public EventResolutionService(ColonyEventRepository eventRepository, AuthenticatedUserService authService) {
         this.eventRepository = eventRepository;
+        this.authService = authService;
     }
 
     // Auto-resolution — called by CatchUpService after ticks
@@ -85,6 +88,7 @@ public class EventResolutionService {
      */
     @Transactional
     public void manualResolve(Long colonyId, Long eventId) {
+        authService.requireColonyOwnership(colonyId);
         ColonyEventEntity event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Event not found: " + eventId));

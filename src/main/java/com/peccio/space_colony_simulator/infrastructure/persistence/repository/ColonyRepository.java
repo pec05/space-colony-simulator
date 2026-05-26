@@ -15,4 +15,6 @@ public interface ColonyRepository extends JpaRepository<ColonyEntity, Long> {
     List<ColonyEntity> findAllByUserId(Long userId);
 
     int countByUserId(Long userId);
+
+    boolean existsByIdAndUserId(Long id, Long userId);
 }

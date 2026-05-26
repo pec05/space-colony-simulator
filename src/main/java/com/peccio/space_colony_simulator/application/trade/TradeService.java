@@ -1,5 +1,6 @@
 package com.peccio.space_colony_simulator.application.trade;
 
+import com.peccio.space_colony_simulator.application.auth.AuthService;
 import com.peccio.space_colony_simulator.infrastructure.config.SimulationProperties;
 import com.peccio.space_colony_simulator.infrastructure.persistence.entity.ColonyEntity;
 import com.peccio.space_colony_simulator.infrastructure.persistence.entity.ColonyResourceEntity;
@@ -7,6 +8,7 @@ import com.peccio.space_colony_simulator.infrastructure.persistence.entity.Trade
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.ColonyRepository;
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.ColonyResourceRepository;
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.TradeRepository;
+import com.peccio.space_colony_simulator.infrastructure.security.AuthenticatedUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,21 +29,24 @@ public class TradeService {
     private final ColonyRepository colonyRepository;
     private final ColonyResourceRepository resourceRepository;
     private final SimulationProperties simulationProperties;
+    private final AuthenticatedUserService authService;
 
     public TradeService(
             TradeRepository tradeRepository,
             ColonyRepository colonyRepository,
             ColonyResourceRepository resourceRepository,
-            SimulationProperties simulationProperties) {
+            SimulationProperties simulationProperties, AuthenticatedUserService authService) {
 
         this.tradeRepository       = tradeRepository;
         this.colonyRepository      = colonyRepository;
         this.resourceRepository    = resourceRepository;
         this.simulationProperties  = simulationProperties;
+        this.authService = authService;
     }
     // initial trade
     @Transactional
     public TradeResponse initiateTrade(Long senderColonyId, TradeRequest request) {
+        authService.requireColonyOwnership(senderColonyId);
         ColonyEntity sender   = loadActiveColony(senderColonyId, "Sender");
         ColonyEntity receiver = loadActiveColony(request.receiverColonyId(), "Receiver");
 
@@ -96,6 +101,7 @@ public class TradeService {
     // Cancel trade
     @Transactional
     public TradeResponse cancelTrade(Long senderColonyId, Long tradeId) {
+        authService.requireColonyOwnership(senderColonyId);
         TradeEntity trade = tradeRepository
                 .findByIdAndSenderColonyId(tradeId, senderColonyId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -132,6 +138,7 @@ public class TradeService {
     // Queries
     @Transactional(readOnly = true)
     public List<TradeResponse> getTradesForColony(Long colonyId) {
+        authService.requireColonyOwnership(colonyId);
         List<TradeEntity> sent     = tradeRepository.findAllBySenderColonyId(colonyId);
         List<TradeEntity> received = tradeRepository.findAllByReceiverColonyId(colonyId);
 

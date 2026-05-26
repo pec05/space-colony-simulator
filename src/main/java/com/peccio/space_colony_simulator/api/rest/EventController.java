@@ -4,6 +4,7 @@ import com.peccio.space_colony_simulator.application.event.EventResolutionServic
 import com.peccio.space_colony_simulator.application.replay.EventSummary;
 import com.peccio.space_colony_simulator.infrastructure.persistence.entity.ColonyEventEntity;
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.ColonyEventRepository;
+import com.peccio.space_colony_simulator.infrastructure.security.AuthenticatedUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +22,12 @@ public class EventController {
 
     private final EventResolutionService eventResolutionService;
     private final ColonyEventRepository colonyEventRepository;
+    private final AuthenticatedUserService authService;
 
-    public EventController(EventResolutionService eventResolutionService, ColonyEventRepository colonyEventRepository) {
+    public EventController(EventResolutionService eventResolutionService, ColonyEventRepository colonyEventRepository, AuthenticatedUserService authService) {
         this.eventResolutionService = eventResolutionService;
         this.colonyEventRepository = colonyEventRepository;
+        this.authService = authService;
     }
 
     /**
@@ -35,6 +38,8 @@ public class EventController {
     public ResponseEntity<List<EventSummary>> getEvents(
             @PathVariable Long colonyId,
             @RequestParam(required = false) Boolean resolved) {
+
+        authService.requireColonyOwnership(colonyId);
 
         List<ColonyEventEntity> entities = (resolved != null)
                 ? colonyEventRepository.findAllByColonyIdAndResolved(colonyId, resolved)
@@ -54,7 +59,7 @@ public class EventController {
     public ResponseEntity<Void> resolveEvent(
             @PathVariable Long colonyId,
             @PathVariable Long eventId) {
-
+        authService.requireColonyOwnership(colonyId);
         eventResolutionService.manualResolve(colonyId, eventId);
         return ResponseEntity.noContent().build();
     }

@@ -3,6 +3,7 @@ package com.peccio.space_colony_simulator.api.rest;
 import com.peccio.space_colony_simulator.application.replay.ColonyStateResponse;
 import com.peccio.space_colony_simulator.application.replay.ReplayResponse;
 import com.peccio.space_colony_simulator.application.replay.ReplayService;
+import com.peccio.space_colony_simulator.infrastructure.security.AuthenticatedUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +20,11 @@ import java.time.LocalDateTime;
 public class ColonyStateController {
 
     private final ReplayService replayService;
+    private final AuthenticatedUserService authService;
 
-    public ColonyStateController(ReplayService replayService) {
+    public ColonyStateController(ReplayService replayService, AuthenticatedUserService authService) {
         this.replayService = replayService;
+        this.authService = authService;
     }
 
     /**
@@ -33,6 +36,7 @@ public class ColonyStateController {
     @GetMapping("/{id}/state")
     public ResponseEntity<ColonyStateResponse> getState(@PathVariable Long id) {
         log.debug("State requested for colony id={}", id);
+        authService.requireColonyOwnership(id);
         return ResponseEntity.ok(replayService.getCurrentState(id));
     }
 
@@ -50,7 +54,9 @@ public class ColonyStateController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime since) {
 
         log.debug("Replay requested for colony id={} since={}", id, since);
+        authService.requireColonyOwnership(id);
         return ResponseEntity.ok(replayService.getReplay(id, since));
     }
+
 
 }

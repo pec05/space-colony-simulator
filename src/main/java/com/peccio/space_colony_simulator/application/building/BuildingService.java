@@ -8,6 +8,7 @@ import com.peccio.space_colony_simulator.infrastructure.persistence.entity.Colon
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.BuildingRepository;
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.ColonyRepository;
 import com.peccio.space_colony_simulator.infrastructure.persistence.repository.ColonyResourceRepository;
+import com.peccio.space_colony_simulator.infrastructure.security.AuthenticatedUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,11 +26,13 @@ public class BuildingService {
     private final BuildingRepository buildingRepository;
     private final ColonyRepository colonyRepository;
     private final ColonyResourceRepository resourceRepository;
+    private final AuthenticatedUserService authService;
 
-    public BuildingService(BuildingRepository buildingRepository, ColonyRepository colonyRepository, ColonyResourceRepository resourceRepository) {
+    public BuildingService(BuildingRepository buildingRepository, ColonyRepository colonyRepository, ColonyResourceRepository resourceRepository, AuthenticatedUserService authService) {
         this.buildingRepository = buildingRepository;
         this.colonyRepository = colonyRepository;
         this.resourceRepository = resourceRepository;
+        this.authService = authService;
     }
 
     /**
@@ -44,6 +47,7 @@ public class BuildingService {
      */
     @Transactional
     public BuildingResponse construct(Long colonyId, BuildingRequest request) {
+        authService.requireColonyOwnership(colonyId);
         ColonyEntity colony = colonyRepository.findById(colonyId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Colony not found: " + colonyId));
@@ -106,6 +110,7 @@ public class BuildingService {
 
     @Transactional(readOnly = true)
     public List<BuildingResponse> getBuildingsForColony(Long colonyId) {
+        authService.requireColonyOwnership(colonyId);
         return buildingRepository.findAllByColonyId(colonyId)
                 .stream()
                 .map(entity -> {
