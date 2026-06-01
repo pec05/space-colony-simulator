@@ -51,7 +51,8 @@ public class SecurityConfig {
                 .securityMatcher(
                         "/api/auth/**",
                         "/api/debug/**",
-                        "/api/buildings/catalog"
+                        "/api/buildings/catalog",
+                        "/ws/**"
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
